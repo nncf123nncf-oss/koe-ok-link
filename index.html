@@ -203,8 +203,10 @@ var KO = (function () {
   var PAREN_CLOSE = '）)】］]〉》';
   // ！？や閉じカッコのあとに、同じ文の続き（と・って・て・という・の…）が来ているか
   // 「と」だけだと「最高でした！とても〜」まで続けてしまうので、「と思」「と言」などに絞る
-  var CONT = ['って', 'と思', 'と言', 'と感', 'とい', 'とか', 'とは', 'とも', 'と叫', 'て思', 'の一', 'など', 'なんて', 'みたい', 'くらい', 'ぐらい'];
+  var CONT = ['って', 'と思', 'と言', 'と感', 'とい', 'とか', 'とは', 'とも思', 'とも言', 'と叫', 'て思', 'の一', 'など', 'なんて', 'みたい', 'くらい', 'ぐらい'];
   function continues(chars, j) {
+    // 「すごい! って思いました」のように、空白を1つはさむ書き方も続きとみなす
+    if (chars[j] === ' ' || chars[j] === '　') j++;
     var rest = chars.slice(j, j + 4).join('');
     for (var k = 0; k < CONT.length; k++) if (rest.indexOf(CONT[k]) === 0) return true;
     return false;
@@ -217,6 +219,8 @@ var KO = (function () {
       var c = chars[i];
       if (c === '\n' || c === '\u2028' || c === '\u2029') { push(); depth = 0; continue; }
       cur += c;
+      // 【レビュー②🟡3】カギ括弧の閉じ忘れで行の残りが全部1文にならないよう、1文の上限を超えたら括弧の中とみなすのをやめる
+      if (depth > 0 && cpLen(cur) > LIM.sent) depth = 0;
       if (OPEN.indexOf(c) >= 0) depth++;
       else if (CLOSE.indexOf(c) >= 0) {
         if (depth > 0) depth--;
@@ -246,7 +250,7 @@ var KO = (function () {
   /* ---- 名前の出し方 ---- */
   function stripHonor(s) { return clean(s).replace(/\s*(さん|さま|様|ちゃん|くん|君|殿)$/, ''); }
   // ひらがな・カタカナはヘボン式の頭文字（ハナ→H、しおり→S、ちか→C）。漢字などは1文字目をそのまま使う
-  var KANA_INI = { a: 'あいうえおぁぃぅぇぉを', k: 'かきくけこ', g: 'がぎぐげご', s: 'さすせそ', sh: 'し', z: 'ざずぜぞづ', j: 'じぢ', t: 'たてと', c: 'ち', ts: 'つっ', d: 'だでど',
+  var KANA_INI = { a: 'あいうえぁぃぅぇ', o: 'おぉを', k: 'かきくけこ', g: 'がぎぐげご', s: 'さすせそ', sh: 'し', z: 'ざずぜぞづ', j: 'じぢ', t: 'たてと', c: 'ち', ts: 'つっ', d: 'だでど',
     n: 'なにぬねのん', h: 'はひへほ', f: 'ふ', b: 'ばびぶべぼ', p: 'ぱぴぷぺぽ', m: 'まみむめも', y: 'やゆよゃゅょ', r: 'らりるれろ', w: 'わゎ', v: 'ゔ' };
   // 【レビュー①🟡5】イニシャルは英字・かな始まりの呼び名だけ。漢字1文字目は名前そのものが出るので選べないようにする
   function initialOf(name) {
@@ -419,9 +423,11 @@ var KO = (function () {
     store.recs.unshift(recFromCfg(cfg)); return 'new';
   }
   // 返事を取り込む（同じ相手・同じ感想の控えを更新。無ければ足す）
-  function importReply(store, cfg, reply) {
+  // 【レビュー②🟡4】聞き直したあとの控えに、前のリンクへの返事を取り込もうとしたら 'stale' を返す（force で取り込む）
+  function importReply(store, cfg, reply, force) {
     var rec = null;
     for (var i = 0; i < store.recs.length; i++) if (sameVoice(store.recs[i], cfg)) { rec = store.recs[i]; break; }
+    if (rec && !force && (rec.places !== cfg.places || rec.item !== cfg.item || rec.date !== cfg.date)) return 'stale';
     var res = 'updated';
     if (!rec) { if (store.recs.length >= LIM.recs) return 'full'; rec = recFromCfg(cfg); store.recs.unshift(rec); res = 'new'; }
     rec.places = cfg.places; rec.item = cfg.item; rec.date = cfg.date; rec.from = cfg.from; rec.ans = reply.ans.slice(); rec.nameMode = reply.nameMode; rec.okPlaces = reply.okPlaces; rec.status = statusOf(reply);
@@ -429,17 +435,23 @@ var KO = (function () {
   }
   // 【レビュー①🔴1】控えの文字は切り詰めない（相手の言葉を変えないため）。上限を超えるものは形の合わない控えとして扱う
   function BAD() { throw new Error('bad'); }
+  // 下書きの上限（入力欄の maxlength と同じ。1字ずつ改行しても4,000文を超えない）
+  var FORM_TEXT = 4000, FORM_SENTS = 4000;
   function str(v, max) { if (v == null) return ''; if (typeof v !== 'string' || cpLen(v) > max) BAD(); return v; }
   // 形の合わない控えは null（呼ぶ側で予備に写し、上書きしない）
   function sanitizeStore(o) {
     try {
-      if (!o || typeof o !== 'object' || !Array.isArray(o.recs) || o.recs.length > LIM.recs || !o.form || typeof o.form !== 'object') return null;
+      if (!o || typeof o !== 'object' || !Array.isArray(o.recs) || o.recs.length > LIM.recs) return null;
       var d = emptyStore();
-      d.from = str(o.from, 100);
-      var f = o.form;
-      if (f.sents != null && (!Array.isArray(f.sents) || f.sents.length > 50)) return null;
-      d.form = { text: str(f.text, 4000), sents: (f.sents || []).map(function (s) { return str(s, 1000); }), name: str(f.name, 100), item: str(f.item, 100),
-        date: str(f.date, 10) || todayIso(), places: Number.isInteger(f.places) ? f.places & ALL_BITS : 0 };
+      d.from = typeof o.from === 'string' && cpLen(o.from) <= 100 ? o.from : '';
+      // 【レビュー②🔴1】下書き（form）は控え（recs）と分けて確かめる。下書きが長すぎる・形が合わないときは、
+      // 下書きだけを空に戻し、声の控えは残す（長い文を貼っただけで控えが消えないように）
+      try {
+        var f = o.form;
+        if (!f || typeof f !== 'object' || (f.sents != null && (!Array.isArray(f.sents) || f.sents.length > FORM_SENTS))) BAD();
+        d.form = { text: str(f.text, FORM_TEXT), sents: (f.sents || []).map(function (s) { return str(s, FORM_TEXT); }), name: str(f.name, 100), item: str(f.item, 100),
+          date: str(f.date, 10) || todayIso(), places: Number.isInteger(f.places) ? f.places & ALL_BITS : 0 };
+      } catch (e) { d.form = blankForm(); d.formDropped = true; }
       for (var i = 0; i < o.recs.length; i++) {
         var r = o.recs[i];
         if (!r || typeof r !== 'object' || !Array.isArray(r.sents) || !r.sents.length || r.sents.length > LIM.sents) return null;
@@ -447,9 +459,12 @@ var KO = (function () {
         var places = Number.isInteger(r.places) ? r.places & ALL_BITS : 0, okPlaces = Number.isInteger(r.okPlaces) ? r.okPlaces & ALL_BITS : 0;
         var ans = Array.isArray(r.ans) && r.ans.length === sents.length && r.ans.every(function (a) { return a === 1 || a === 2; }) ? r.ans.slice() : null;
         var nameMode = [1, 2, 3].indexOf(r.nameMode) >= 0 ? r.nameMode : 0;
+        var rname = str(r.name, 100);
         // 【レビュー①🟡1】聞いた場所の外のOKや、名前の出し方のない返事は「返事待ち」に戻す
-        var status = ans && nameMode && (okPlaces & ~places) === 0 && STATUS_TEXT[r.status] && r.status !== 'wait' ? r.status : 'wait';
-        d.recs.push({ name: str(r.name, 100), item: str(r.item, 100), date: str(r.date, 10), places: places, sents: sents, from: str(r.from, 100),
+        // 【レビュー②🟢1】状態は答えから計算し直す。漢字の呼び名のイニシャルも返事待ちに戻す（リンクの検証とそろえる）
+        var okReply = ans && nameMode && (okPlaces & ~places) === 0 && r.status !== 'wait' && !(nameMode === 2 && !hasInitial(rname));
+        var status = okReply ? statusOf({ ans: ans, okPlaces: okPlaces }) : 'wait';
+        d.recs.push({ name: rname, item: str(r.item, 100), date: str(r.date, 10), places: places, sents: sents, from: str(r.from, 100),
           status: status, ans: status === 'wait' ? null : ans, nameMode: status === 'wait' ? 0 : nameMode, okPlaces: status === 'wait' ? 0 : okPlaces });
       }
       return d;
@@ -716,6 +731,7 @@ var CARD = (function () {
     app.appendChild(h('h1', { text: 'お客さまの声の掲載OKリンク' }));
     app.appendChild(h('p', { class: 'lead', text: 'もらった感想を貼り付けると、1文ずつに区切ります。リンクを送ると、相手が文ごとに「載せてOK」「載せないで」と名前の出し方を選んで送り返せます。返事から、選ばれた範囲だけのカード画像を作れます。ページの下のボタンで見本を入れられます。' }));
     if (!storageOk) app.appendChild(h('div', { class: 'errors', text: 'この端末では入力を保存できません。ページを閉じると入力が消えます。' }));
+    if (store.formDropped) app.appendChild(h('div', { class: 'errors', text: '前回の感想の入力欄が読み取れなかったため、入力欄を空にしました。声の控えはそのまま残っています。' }));
     if (broken) app.appendChild(h('div', { class: 'errors' }, [
       h('p', { text: 'この端末に残っていた控えが読み取れませんでした。元の控えは消さずに予備として残してあります（いまの画面での入力は保存しません）。' }),
       h('button', { type: 'button', text: '予備に残したまま、新しく始める', onclick: function () {
@@ -732,7 +748,7 @@ var CARD = (function () {
     var voiceBox = h('div', { class: 'panel' }), whoBox = h('div', { class: 'panel' });
     left.appendChild(voiceBox); left.appendChild(whoBox);
     var tid = 'f' + (++uid);
-    var ta = h('textarea', { id: tid, rows: 6, placeholder: 'DMやメールでもらった感想を、そのまま貼り付けてください' });
+    var ta = h('textarea', { id: tid, rows: 6, maxlength: 4000, placeholder: 'DMやメールでもらった感想を、そのまま貼り付けてください' });
     ta.value = form.text;
     var sentBox = h('div');
     ta.addEventListener('input', function () { form.text = ta.value; form.sents = KO.splitSentences(ta.value); buildSents(); invalidate(); save(); });
@@ -1031,6 +1047,10 @@ var CARD = (function () {
       h('div', { class: 'stack' }, [h('button', { type: 'button', text: '声の控えに取り込む', onclick: function () {
         var st = loadStore(); if (broken) { msg.textContent = '控えが読み取れなかったため、取り込めませんでした。'; return; }
         var res = KO.importReply(st, cfg, reply);
+        if (res === 'stale') {
+          if (!confirm('この返事は、商品・もらった日・載せたい場所が、いまの控えと違うときに聞いたリンクへの返事です（聞き直す前の返事かもしれません）。それでも取り込みますか？')) { msg.textContent = '取り込みませんでした。'; return; }
+          res = KO.importReply(st, cfg, reply, true);
+        }
         if (res === 'full') { msg.textContent = '控えが' + KO.LIM.recs + '件に達しているため、取り込めませんでした。'; return; }
         saveStore(st);
         // 【レビュー①🟡7】聞いたときの控えと一致しないときは、文が変わっていないか確かめてもらう
