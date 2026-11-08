@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>お客さまの声の掲載OKリンク</title>
+<meta name="description" content="もらった感想を、載せてよいか相手に確かめるページです。感想を1文ずつに区切ってリンクで送ると、相手が文ごとに載せる・載せないと名前の出し方を選んで送り返せます。選ばれた範囲だけで、投稿用のカード画像を作れます。">
+<style>
+  :root {
+    --bg: #f3f8f8; --surface: #ffffff; --ink: #14272a; --ink2: #33484b; --ink3: #4e6366;
+    --line: #d3e1e2; --line-strong: #5f7a7d; --accent: #1f6f78; --accent-ink: #ffffff; --accent-soft: #e0f0f1;
+    --ok: #1d6a3a; --ok-soft: #e3f2e8; --no: #5b5f66; --no-soft: #ececee;
+    --danger: #a8231b; --danger-soft: #fbe9e7; --notice: #e8f1f1;
+    --font: "Hiragino Sans","Yu Gothic","BIZ UDPGothic","Noto Sans JP",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1718; --surface: #152224; --ink: #e8f2f2; --ink2: #c6d6d7; --ink3: #a5b8b9;
+      --line: #28393b; --line-strong: #7f9a9c; --accent: #7fc8cf; --accent-ink: #0b2225; --accent-soft: #1b3437;
+      --ok: #8fd6a7; --ok-soft: #16301f; --no: #c2c6cc; --no-soft: #2a2d31;
+      --danger: #ff9a92; --danger-soft: #3a1f1c; --notice: #18292b;
+    }
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.6; }
+  main { max-width: 1080px; margin: 0 auto; padding: 16px 16px 32px; }
+  h1 { font-size: 22px; line-height: 1.3; margin: 8px 0 8px; overflow-wrap: anywhere; }
+  h2 { font-size: 18px; line-height: 1.4; margin: 0 0 10px; overflow-wrap: anywhere; }
+  h3 { font-size: 16px; line-height: 1.4; margin: 0 0 8px; overflow-wrap: anywhere; }
+  p { margin: 0 0 10px; }
+  .lead { color: var(--ink2); }
+  .notes { margin: 0 0 14px; padding-left: 1.2em; color: var(--ink2); font-size: 15px; }
+  .notes li { margin-bottom: 2px; }
+  .small { font-size: 14px; color: var(--ink3); overflow-wrap: anywhere; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-bottom: 14px; min-width: 0; }
+  label.f { display: block; font-weight: 600; margin: 0 0 4px; }
+  .hint { font-weight: 400; color: var(--ink3); font-size: 14px; }
+  input[type=text], input[type=date], textarea {
+    display: block; width: 100%; max-width: 100%; min-width: 0; min-height: 44px; font: inherit; font-size: 16px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line-strong); border-radius: 6px; padding: 8px 10px; margin: 0 0 10px; -webkit-appearance: none; appearance: none; }
+  textarea { resize: vertical; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible, .chk input:focus-visible + span, .seg input:focus-visible + span {
+    outline: 3px solid var(--accent); outline-offset: 2px; }
+  button { font: inherit; font-size: 16px; min-height: 44px; min-width: 44px; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+  .stack { display: grid; gap: 10px; margin: 0 0 8px; }
+  .stack button { width: 100%; min-height: 52px; font-size: 17px; }
+  .errors { border: 2px solid var(--danger); background: var(--danger-soft); border-radius: 8px; padding: 10px 12px; margin: 0 0 12px; color: var(--ink); }
+  .errors ul { margin: 4px 0 0; padding-left: 1.2em; }
+  .okmsg { color: var(--ink2); font-weight: 600; }
+  .urlbox { font-size: 14px; word-break: break-all; overflow-wrap: anywhere; }
+  .len { font-weight: 700; }
+  .msgbox { font-size: 15px; white-space: pre-wrap; }
+  .linklike { background: none; border: 0; color: var(--accent); text-decoration: underline; padding: 8px 0; min-height: 44px; }
+  .two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 10px; }
+  @media (min-width: 560px) { .two { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  /* チェック欄・選択欄 */
+  .chk, .seg { display: grid; gap: 8px; margin: 0 0 10px; border: 0; padding: 0; min-width: 0; }
+  .chk legend, .seg legend { font-weight: 600; margin: 0 0 4px; padding: 0; }
+  .chk label, .seg label { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; border: 1px solid var(--line-strong); border-radius: 6px; cursor: pointer; overflow-wrap: anywhere; }
+  .chk input, .seg input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--accent); }
+  .chk label:has(input:checked), .seg label:has(input:checked) { border: 2px solid var(--accent); background: var(--accent-soft); font-weight: 700; }
+  .chk.cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .seg.cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .seg.cols3 label { justify-content: center; padding: 6px 6px; }
+  /* 文の並び */
+  .sents { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; counter-reset: s; }
+  .scard { border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px 12px; background: var(--surface); min-width: 0; }
+  .shead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 4px; }
+  .snum { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .stext { overflow-wrap: anywhere; margin: 0; }
+  .shead button { min-height: 44px; padding: 4px 10px; font-size: 14px; }
+  .answer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .answer button { min-height: 48px; font-weight: 700; padding: 8px 6px; }
+  /* 色だけに頼らず、OKは塗りつぶし・載せないは破線の枠で形を変える */
+  .answer button[aria-pressed="true"].a-ok { background: var(--ok); color: var(--surface); border: 2px solid var(--ok); }
+  .answer button[aria-pressed="true"].a-no { background: var(--no-soft); color: var(--ink); border: 3px dashed var(--no); }
+  .scard.is-ok { border-left: 5px solid var(--ok); }
+  .scard.is-no { border: 2px dashed var(--no); border-left: 5px dashed var(--no); }
+  .scard.is-no .stext { color: var(--ink3); }
+  .tag { display: inline-block; font-size: 13px; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+  .tag.ok { background: var(--ok-soft); color: var(--ok); border: 1px solid var(--ok); }
+  .tag.no { background: var(--no-soft); color: var(--no); border: 1px dashed var(--no); }
+  .tag.wait { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+  .progress { font-weight: 700; margin: 0 0 10px; }
+  /* 説明・注記 */
+  .notice { background: var(--notice); border: 1px solid var(--line-strong); border-left: 6px solid var(--accent); border-radius: 6px; padding: 10px 12px; margin: 0 0 14px; font-size: 14px; color: var(--ink2); }
+  .rule { border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px 12px; margin: 0 0 14px; background: var(--surface); font-size: 14px; color: var(--ink2); }
+  .v-title { font-size: 21px; line-height: 1.35; margin: 0 0 4px; overflow-wrap: anywhere; }
+  .v-sub { color: var(--ink3); font-size: 15px; margin: 0 0 12px; overflow-wrap: anywhere; }
+  /* カード画像 */
+  .cardwrap { margin: 0 0 12px; }
+  .cardwrap canvas, .cardwrap img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); }
+  .preview { max-width: 320px; }
+  .summary { margin: 0 0 12px; padding: 0; list-style: none; display: grid; gap: 4px; }
+  .summary li { overflow-wrap: anywhere; }
+  .summary b { display: inline-block; min-width: 7.5em; }
+  /* 声の控え */
+  .recs { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+  .rcard { border: 1px solid var(--line-strong); border-radius: 8px; padding: 10px 12px; background: var(--surface); min-width: 0; }
+  .r1 { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+  .rname { font-weight: 700; overflow-wrap: anywhere; }
+  .r2 { font-size: 14px; color: var(--ink3); margin-top: 2px; overflow-wrap: anywhere; }
+  .rfoot { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+  .rfoot button { padding: 6px 12px; font-size: 15px; }
+  .mw-footer { box-sizing: border-box; width: 100%; max-width: 100%; margin: 24px 0 0; padding: 16px; background: #F7F7F8;
+    border: 1px solid #D8D8DC; border-radius: 6px; color: #3A3A3E; font-family: system-ui, sans-serif; font-size: 12px; line-height: 1.7; }
+  .mw-footer p { margin: 0 0 6px; } .mw-footer p:last-child { margin-bottom: 0; } .mw-footer a { color: #0B5AA6; display: inline-block; padding: 13px 0; }
+  @media (min-width: 880px) {
+    .layout { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 20px; align-items: start; }
+    .sticky { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+    .viewpage { max-width: 600px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div id="app"></div>
+  <footer class="mw-footer">
+    <p>みちAIワークス（MICHI AI WORKS）／代表 田中　泉</p>
+    <p>運営: <a href="https://michi-portfolio.vercel.app/" rel="noopener">みちAIワークス 公式サイト</a>（https://michi-portfolio.vercel.app/ ）／ お問い合わせ: <a href="mailto:nncf123nncf@gmail.com">nncf123nncf@gmail.com</a></p>
+    <p>入力した内容は、お使いの端末のブラウザで扱います。リンクの画面は、リンクを作った方が入力した内容を表示するだけで、当サイトは内容の確認や保証をしていません。アクセス解析（Cloudflare Web Analytics）で、ページの閲覧状況（閲覧数・参照元・ブラウザの種類など）を計測しています。</p>
+    <p>ログイン・会員登録・パスワードの入力を求めることはありません。</p>
+  </footer>
+</main>
+
+<script id="core">
+var KO = (function () {
+  var KEY = 'koe-ok-v1';
+  var LIM = { text: 400, sents: 12, sent: 120, name: 10, item: 20, from: 20, recs: 100 };
+  var HASH_MAX = 4000, URL_MAX = 2000;
+  // 載せたい場所（ビットで持つ）
+  var PLACES = [
+    { bit: 1, label: 'Xの投稿', short: 'X' },
+    { bit: 2, label: 'Instagram', short: 'Instagram' },
+    { bit: 4, label: '販売ページ', short: '販売ページ' },
+    { bit: 8, label: 'noteやブログの記事', short: 'noteやブログの記事' }
+  ];
+  var ALL_BITS = 15;
+  // 名前の出し方: 1=呼び名のまま 2=イニシャル 3=名前を出さない
+  var NAME_MODES = ['', '呼び名のまま', 'イニシャル', '名前を出さない'];
+  var NO_NAME = '購入者さま';
+  // 見えない文字（書式文字 Cf）とハングルのフィラーは落とす（Day085・093と同じ）
+  // 絵文字をつなぐ見えない文字（U+200D）だけは残す。照合の前の norm() では消すので、すり抜けには使えない
+  var RE_INVISIBLE = new RegExp('(?!\\u200d)[\\p{Cf}' + String.fromCharCode(0x3164, 0x115f, 0x1160, 0xffa0) + ']', 'gu');
+
+  function clean(s) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]+/g, ' ').replace(RE_INVISIBLE, '').replace(/\s+/g, ' ').trim(); }
+  function nameKey(s) { return clean(s).normalize('NFKC').toLowerCase().replace(/\s/g, ''); }
+  function cpLen(s) { return Array.from(s).length; }
+  function norm(s) {
+    return String(s).normalize('NFKC').toLowerCase()
+      .replace(/[\u00ad\u200b-\u200f\u2060-\u2064\ufeff]/g, '')
+      .replace(/[‐-―−ーｰ]/g, '-').replace(/[。｡]/g, '.');
+  }
+  var RE_FILLER = new RegExp('[' + String.fromCharCode(0x3164, 0x115f, 0x1160, 0xffa0) + ']', 'g');
+  function wordKey(s) {
+    return norm(s).replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); })
+      .replace(/[^\p{L}\p{N}]/gu, '').replace(RE_FILLER, '');
+  }
+  function hasWord(key, words) { for (var i = 0; i < words.length; i++) if (key.indexOf(words[i]) >= 0) return true; return false; }
+  // リンク・メールアドレス・電話番号らしい文字を見つける（Day085・093の規則を流用）
+  var TLD = '(?:com|net|org|jp|me|io|co|info|biz|xyz|app|dev|link|page|shop|site|online|tokyo|ly|gl|to|cc|tv|us|uk|ne|or|ac|go|ee|gle|be|gd|ai|fm|in|so|top|cn|ru|kr|tw|hk|ws|gg|sh|im|is|li|la|vip|club|live|work|fun|icu)';
+  var RE_DOMAIN = new RegExp('[^\\s.]+\\.' + TLD + '(?![a-z])');
+  var LEAD_WORDS = ['lineid', 'らいんid', 'id検索', '友だち追加', '友達追加', 'ともだち追加', 'paypayid', 'kyashid'].map(wordKey);
+  // 呼び名・商品・あなたの名前の欄では、お金を動かす言葉も止める（偽の請求や振込の案内に見せないため）
+  var MONEY_WORDS = ['振込', '振り込', 'ふりこみ', '払込', '払い込', '送金', '入金', '支払', 'しはらい', '請求', '期日', '期限', '至急', '未払', '延滞', '督促', '滞納', '差押', '差し押', '法的', '最終通知', '決済', '本日中', 'ぺいぺい', '口座', '銀行', 'ぎんこう', '信用金庫', '信金', 'ゆうちょ', '通帳', '暗証', 'カード番号', '名義', 'paypay', 'bank', 'パスワード', 'ぱすわーど', 'ログイン', 'ろぐいん'].map(wordKey);
+  var KANJI_DIGITS = '〇一二三四五六七八九';
+  var RE_DATE = /(?<!\d)(?:19|20)\d{2}[\-\/.](?:0?[1-9]|1[0-2])[\-\/.](?:0?[1-9]|[12]\d|3[01])(?!\d)/g;
+  var RE_MD = /(?<![\d\/])(?:0?[1-9]|1[0-2])\/(?:0?[1-9]|[12]\d|3[01])(?!\d|\/\d)/g;
+  // body=true は感想の本文（お金の言葉は「価格以上の内容でした」など普通に出るので止めない）
+  function blockedReason(s, body) {
+    var n = norm(s), compact = n.replace(/\s/g, ''), key = wordKey(s);
+    var dotted = compact.replace(/ドット|どっと|\(dot\)|\[dot\]|dot/g, '.');
+    if (/https?|:\/\/|www\.|tel:|mailto:/.test(compact) || RE_DOMAIN.test(n) || RE_DOMAIN.test(compact) || RE_DOMAIN.test(dotted)) return 'link';
+    if (hasWord(key, LEAD_WORDS)) return 'lead';
+    if (/@(?!\d)/.test(n)) return 'mail';
+    if (!body && hasWord(key, MONEY_WORDS)) return 'money';
+    var digits = n.replace(/[〇一二三四五六七八九]/g, function (c) { return String(KANJI_DIGITS.indexOf(c)); }).replace(RE_DATE, ' ').replace(RE_MD, ' ');
+    if (/\+\d[\d\s().\/_\-・、]{6,}/.test(digits)) return 'number';
+    var runs = digits.match(/\d[\d\s().\/_\-・、]*\d/g) || [];
+    for (var i = 0; i < runs.length; i++) if (runs[i].replace(/\D/g, '').length >= 7) return 'number';
+    return '';
+  }
+  var REASON_TEXT = { link: 'リンク', mail: 'メールアドレス（@）', number: '7桁以上の数字（電話番号など）' };
+
+  function validDate(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); if (!m) return false;
+    var y = +m[1], mo = +m[2], d = +m[3]; if (y < 2000 || y > 2099) return false;
+    var dt = new Date(Date.UTC(y, mo - 1, d));
+    return dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
+  }
+  function dateMd(s) { if (!validDate(s)) return ''; var p = s.split('-').map(Number); return p[1] + '月' + p[2] + '日'; }
+  function todayIso() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+  /* ---- 文の区切り ---- */
+  var OPEN = '「『（(【［[〈《“‘', CLOSE = '」』）)】］]〉》”’';
+  var ENDS = '。！？!?';
+  var PAREN_CLOSE = '）)】］]〉》';
+  // ！？や閉じカッコのあとに、同じ文の続き（と・って・て・という・の…）が来ているか
+  // 「と」だけだと「最高でした！とても〜」まで続けてしまうので、「と思」「と言」などに絞る
+  var CONT = ['って', 'と思', 'と言', 'と感', 'とい', 'とか', 'とは', 'とも', 'と叫', 'て思', 'の一', 'など', 'なんて', 'みたい', 'くらい', 'ぐらい'];
+  function continues(chars, j) {
+    var rest = chars.slice(j, j + 4).join('');
+    for (var k = 0; k < CONT.length; k++) if (rest.indexOf(CONT[k]) === 0) return true;
+    return false;
+  }
+  // 「。」「！」「？」の直後と改行で区切る。カギ括弧の中の「。」では区切らない。続く「！！」「」」は前の文に付ける
+  function splitSentences(text) {
+    var out = [], cur = '', depth = 0, chars = Array.from(String(text == null ? '' : text).replace(/\r\n?/g, '\n'));
+    function push() { var s = clean(cur); if (s) out.push(s); cur = ''; }
+    for (var i = 0; i < chars.length; i++) {
+      var c = chars[i];
+      if (c === '\n' || c === '\u2028' || c === '\u2029') { push(); depth = 0; continue; }
+      cur += c;
+      if (OPEN.indexOf(c) >= 0) depth++;
+      else if (CLOSE.indexOf(c) >= 0) {
+        if (depth > 0) depth--;
+        // 「（〜でした。）」のように、丸カッコの中が文の終わりで閉じたときだけ区切る。
+        // 【レビュー①🟡3】カギ括弧「」『』は引用なので、閉じても区切らない（「すごい！」と思いました。を割らない）
+        var prev = chars[i - 1] || '';
+        if (depth === 0 && PAREN_CLOSE.indexOf(c) >= 0 && ENDS.indexOf(prev) >= 0 && !continues(chars, i + 1)) { while (i + 1 < chars.length && (ENDS.indexOf(chars[i + 1]) >= 0 || CLOSE.indexOf(chars[i + 1]) >= 0)) cur += chars[++i]; push(); }
+      }
+      else if (ENDS.indexOf(c) >= 0 && depth === 0) {
+        // 続く「！！」と、閉じカッコ（「〜でした。」のように文の外側にあるもの）は前の文に付ける
+        while (i + 1 < chars.length && (ENDS.indexOf(chars[i + 1]) >= 0 || CLOSE.indexOf(chars[i + 1]) >= 0)) { cur += chars[++i]; }
+        // 【レビュー①🟡3】「ほんとに?って思いました」のように、！？のあとに文が続くときは区切らない
+        if (c !== '。' && continues(chars, i + 1)) continue;
+        push();
+      }
+    }
+    push();
+    return out;
+  }
+  function joinAt(sents, i) {
+    if (i < 0 || i >= sents.length - 1) return sents.slice();
+    var a = sents.slice(); a.splice(i, 2, joinTwo(a[i], a[i + 1])); return a;
+  }
+  // 【レビュー①🟡4】改行で区切られていた文（句点で終わらない文）をつなぐときは、空白を1つはさむ
+  function joinTwo(x, y) { var last = Array.from(x).pop() || ''; return ENDS.indexOf(last) >= 0 || CLOSE.indexOf(last) >= 0 ? x + y : x + ' ' + y; }
+
+  /* ---- 名前の出し方 ---- */
+  function stripHonor(s) { return clean(s).replace(/\s*(さん|さま|様|ちゃん|くん|君|殿)$/, ''); }
+  // ひらがな・カタカナはヘボン式の頭文字（ハナ→H、しおり→S、ちか→C）。漢字などは1文字目をそのまま使う
+  var KANA_INI = { a: 'あいうえおぁぃぅぇぉを', k: 'かきくけこ', g: 'がぎぐげご', s: 'さすせそ', sh: 'し', z: 'ざずぜぞづ', j: 'じぢ', t: 'たてと', c: 'ち', ts: 'つっ', d: 'だでど',
+    n: 'なにぬねのん', h: 'はひへほ', f: 'ふ', b: 'ばびぶべぼ', p: 'ぱぴぷぺぽ', m: 'まみむめも', y: 'やゆよゃゅょ', r: 'らりるれろ', w: 'わゎ', v: 'ゔ' };
+  // 【レビュー①🟡5】イニシャルは英字・かな始まりの呼び名だけ。漢字1文字目は名前そのものが出るので選べないようにする
+  function initialOf(name) {
+    var c = Array.from(stripHonor(name).normalize('NFKC'))[0] || '';
+    if (/[a-z]/i.test(c)) return c.toUpperCase();
+    var hira = c.replace(/[ァ-ヶ]/g, function (x) { return String.fromCharCode(x.charCodeAt(0) - 0x60); });
+    for (var k in KANA_INI) if (KANA_INI[k].indexOf(hira) >= 0) return k.charAt(0).toUpperCase();
+    return '';
+  }
+  function hasInitial(name) { return initialOf(name) !== ''; }
+  function displayName(name, mode) {
+    if (mode === 1) return stripHonor(name) + 'さん';
+    if (mode === 2 && hasInitial(name)) return initialOf(name) + 'さん';
+    return NO_NAME;
+  }
+  function placeLabels(bits, short) { return PLACES.filter(function (p) { return bits & p.bit; }).map(function (p) { return short ? p.short : p.label; }); }
+  function joinJa(list) { return list.length <= 1 ? (list[0] || '') : list.length === 2 ? list[0] + 'と' + list[1] : list.join('・'); }
+
+  /* ---- 入力の確かめ ---- */
+  function checkText(v, max, label, req, errs, body) {
+    var s = clean(v);
+    if (req && !s) errs.push(label + 'を入れてください');
+    if (cpLen(s) > max) errs.push(label + 'は' + max + '字までです');
+    var b = s ? blockedReason(s, body) : '';
+    if (b === 'money') errs.push(label + '：振込・口座・支払い・ログインに関わる言葉は入れられません');
+    else if (b === 'lead') errs.push(label + '：LINE IDなど、連絡先を書くことはできません');
+    else if (b) errs.push(label + 'に' + REASON_TEXT[b] + 'らしい文字は入れられません');
+    return s;
+  }
+  // 作る画面の入力 → 聞くリンクの設定
+  function toConfig(form, from) {
+    var errs = [];
+    var sents = (form.sents || []).map(clean).filter(Boolean);
+    if (!sents.length) errs.push('感想を貼り付けてください');
+    if (sents.length > LIM.sents) errs.push('感想は' + LIM.sents + '文までです（いまは' + sents.length + '文）。短くするか、2回に分けてください');
+    var total = sents.reduce(function (n, s) { return n + cpLen(s); }, 0);
+    if (total > LIM.text) errs.push('感想は' + LIM.text + '字までです（いまは' + total + '字）');
+    sents.forEach(function (s, i) {
+      if (cpLen(s) > LIM.sent) errs.push((i + 1) + '文目が長すぎます（1文' + LIM.sent + '字まで）。句点で区切ってください');
+      var b = blockedReason(s, true);
+      if (b === 'lead') errs.push((i + 1) + '文目：LINE IDなど、連絡先を書くことはできません');
+      else if (b) errs.push((i + 1) + '文目に' + REASON_TEXT[b] + 'らしい文字があります。その部分を消してから貼り付けてください');
+    });
+    var rawName = checkText(form.name, LIM.name, '相手の呼び名', true, errs), name = stripHonor(rawName);
+    var item = checkText(form.item, LIM.item, 'どの商品の感想か', false, errs);
+    var rawFrom = checkText(from, LIM.from, 'あなたの名前', false, errs), fromS = stripHonor(rawFrom);
+    // 【レビュー①🟡2】「様」だけ・「ハナさんさん」は、相手の画面で読めないリンクになるので、ここで止める
+    if (rawName && (!name || stripHonor(name) !== name)) errs.push('相手の呼び名は、「さん」「様」を付けずに入れてください');
+    if (rawFrom && (!fromS || stripHonor(fromS) !== fromS)) errs.push('あなたの名前は、「さん」「様」を付けずに入れてください');
+    var date = clean(form.date);
+    if (!validDate(date)) errs.push('もらった日を入れてください');
+    var places = (form.places | 0) & ALL_BITS;
+    if (!places) errs.push('載せたい場所を1つ以上選んでください');
+    if (errs.length) return { cfg: null, errors: errs };
+    var cfg = { from: fromS, name: name, item: item, date: date, places: places, sents: sents };
+    return { cfg: cfg, errors: [] };
+  }
+
+  /* ---- 文面（相手に送る文なので句読点あり） ---- */
+  function sendText(c, url) {
+    var L = [];
+    L.push(c.name + 'さん、先日は感想をありがとうございました。');
+    L.push('とても嬉しかったので、' + joinJa(placeLabels(c.places, true)) + 'で紹介させていただけないかと思っています。');
+    L.push('下のリンクで、載せてよい文と、お名前の出し方を選んでいただけますか。');
+    L.push('どれも載せないでほしい場合も、そのまま選んでいただければ大丈夫です。');
+    if (url) L.push(url);
+    return L.join('\n');
+  }
+  function replyText(c, r, url) {
+    var ok = r.ans.filter(function (a) { return a === 1; }).length;
+    var L = [];
+    if (c.from) L.push(c.from + 'さん');
+    if (!ok || !r.okPlaces) L.push('感想は、今回は載せないでください。');
+    else {
+      L.push('感想の載せ方を選びました。');
+      L.push('載せてよい文：' + ok + '文（全' + c.sents.length + '文）');
+      L.push('お名前：' + NAME_MODES[r.nameMode] + '（' + displayName(c.name, r.nameMode) + '）');
+      L.push('載せてよい場所：' + placeLabels(r.okPlaces).join('・'));
+    }
+    if (url) { L.push('返事のリンクはこちらです。'); L.push(url); }
+    return L.join('\n');
+  }
+
+  /* ---- 返事のまとめ ---- */
+  function statusOf(r) {
+    var ok = r.ans.filter(function (a) { return a === 1; }).length;
+    if (!ok || !r.okPlaces) return 'no';
+    return ok === r.ans.length ? 'ok' : 'part';
+  }
+  var STATUS_TEXT = { wait: '返事待ち', ok: '載せてOK', part: '一部OK', no: '載せないで' };
+  // カードに描く文のまとまり。間の文が抜けたところで分ける（間は「……」でつなぐ）
+  function cardGroups(sents, ans) {
+    var groups = [], cur = null;
+    sents.forEach(function (s, i) {
+      if (ans[i] === 1) { if (!cur) { cur = []; groups.push(cur); } cur.push(s); }
+      else cur = null;
+    });
+    return groups.map(function (g) { return g.reduce(function (acc, s) { return acc ? joinTwo(acc, s) : s; }, ''); });
+  }
+
+  /* ---- 設定 ⇄ URLの # 以降 ---- */
+  function b64urlEncode(str) {
+    var bytes = new TextEncoder().encode(str), bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function b64urlDecode(s) {
+    var b = s.replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    var bin = atob(b), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  }
+  function pack(c) { return [1, c.from, c.name, c.item, c.date, c.places, c.sents.slice()]; }
+  function encode(c) { return 'a1=' + b64urlEncode(JSON.stringify(pack(c))); }
+  function encodeReply(c, r) { var a = pack(c); a.push(r.ans.slice(), r.nameMode, r.okPlaces); return 'r1=' + b64urlEncode(JSON.stringify(a)); }
+  // いちばん長くなる返事（答え・名前の出し方・場所の数字の桁は固定なので、どれを選んでも長さは同じ）
+  function worstReply(c) { return encodeReply(c, { ans: c.sents.map(function () { return 2; }), nameMode: 3, okPlaces: c.places }); }
+  function isStr(v, max, req, body) { return typeof v === 'string' && cpLen(v) <= max && (!req || v.length > 0) && v === clean(v) && (!v || !blockedReason(v, body)); }
+  function unpack(a, withAns) {
+    if (!Array.isArray(a) || a.length !== (withAns ? 10 : 7) || a[0] !== 1) return null;
+    if (!isStr(a[1], LIM.from, false) || !isStr(a[2], LIM.name, true) || !isStr(a[3], LIM.item, false)) return null;
+    if (a[1] !== stripHonor(a[1]) || a[2] !== stripHonor(a[2])) return null;
+    if (typeof a[4] !== 'string' || !validDate(a[4])) return null;
+    if (!Number.isInteger(a[5]) || a[5] < 1 || a[5] > ALL_BITS) return null;
+    var s = a[6];
+    if (!Array.isArray(s) || s.length < 1 || s.length > LIM.sents) return null;
+    var total = 0;
+    for (var i = 0; i < s.length; i++) { if (!isStr(s[i], LIM.sent, true, true)) return null; total += cpLen(s[i]); }
+    if (total > LIM.text) return null;
+    var cfg = { from: a[1], name: a[2], item: a[3], date: a[4], places: a[5], sents: s.slice() };
+    if (!withAns) return { cfg: cfg };
+    var ans = a[7], mode = a[8], okp = a[9];
+    if (!Array.isArray(ans) || ans.length !== s.length) return null;
+    for (i = 0; i < ans.length; i++) if (ans[i] !== 1 && ans[i] !== 2) return null;
+    if (mode !== 1 && mode !== 2 && mode !== 3) return null;
+    if (mode === 2 && !hasInitial(cfg.name)) return null;
+    // 載せてよい場所は、聞いた場所の範囲の中だけ
+    if (!Number.isInteger(okp) || okp < 0 || (okp & ~cfg.places) !== 0) return null;
+    return { cfg: cfg, reply: { ans: ans.slice(), nameMode: mode, okPlaces: okp } };
+  }
+  function decodeHash(h) {
+    try {
+      h = String(h == null ? '' : h).replace(/^#/, '');
+      if (h.length > HASH_MAX) return null;
+      var m = /^(a1|r1)=([A-Za-z0-9_-]+)$/.exec(h);
+      if (!m) return null;
+      var o = unpack(JSON.parse(b64urlDecode(m[2])), m[1] === 'r1');
+      if (!o) return null;
+      o.kind = m[1] === 'r1' ? 'reply' : 'ask';
+      return o;
+    } catch (e) { return null; }
+  }
+
+  /* ---- 下書きと声の控え ---- */
+  function blankForm() { return { text: '', sents: [], name: '', item: '', date: todayIso(), places: 1 | 4 }; }
+  function emptyStore() { return { from: '', form: blankForm(), recs: [] }; }
+  var SAMPLE_TEXT = 'ノートを読んで、毎朝の投稿が10分で終わるようになりました。\nいままでは何を書くかで30分は悩んでいたので、本当に助かっています。\n実は本業の会社には内緒で発信しているので、そこだけ伏せてもらえると嬉しいです。\n次のノートも楽しみにしています！';
+  function sampleForm() { return { text: SAMPLE_TEXT, sents: splitSentences(SAMPLE_TEXT), name: 'ハナ', item: 'Threads運用ノート', date: '2026-11-06', places: 1 | 4 }; }
+  function sameVoice(rec, cfg) { return nameKey(rec.name) === nameKey(cfg.name) && rec.sents.join('\n') === cfg.sents.join('\n'); }
+  function recFromCfg(cfg) { return { name: cfg.name, item: cfg.item, date: cfg.date, places: cfg.places, sents: cfg.sents.slice(), from: cfg.from, status: 'wait', ans: null, nameMode: 0, okPlaces: 0 }; }
+  // 聞くリンクを作ったら「返事待ち」で控える（同じ相手・同じ感想があれば、場所などだけ新しくする）
+  function addAsked(store, cfg) {
+    for (var i = 0; i < store.recs.length; i++) if (sameVoice(store.recs[i], cfg)) {
+      // 【レビュー①🟡1】聞き直したら、前の返事は使わない（場所や商品が変わると、前のOKと食い違うため）
+      var r = store.recs[i]; r.item = cfg.item; r.date = cfg.date; r.places = cfg.places; r.from = cfg.from;
+      r.status = 'wait'; r.ans = null; r.nameMode = 0; r.okPlaces = 0; return 'same';
+    }
+    if (store.recs.length >= LIM.recs) return 'full';
+    store.recs.unshift(recFromCfg(cfg)); return 'new';
+  }
+  // 返事を取り込む（同じ相手・同じ感想の控えを更新。無ければ足す）
+  function importReply(store, cfg, reply) {
+    var rec = null;
+    for (var i = 0; i < store.recs.length; i++) if (sameVoice(store.recs[i], cfg)) { rec = store.recs[i]; break; }
+    var res = 'updated';
+    if (!rec) { if (store.recs.length >= LIM.recs) return 'full'; rec = recFromCfg(cfg); store.recs.unshift(rec); res = 'new'; }
+    rec.places = cfg.places; rec.item = cfg.item; rec.date = cfg.date; rec.from = cfg.from; rec.ans = reply.ans.slice(); rec.nameMode = reply.nameMode; rec.okPlaces = reply.okPlaces; rec.status = statusOf(reply);
+    return res;
+  }
+  // 【レビュー①🔴1】控えの文字は切り詰めない（相手の言葉を変えないため）。上限を超えるものは形の合わない控えとして扱う
+  function BAD() { throw new Error('bad'); }
+  function str(v, max) { if (v == null) return ''; if (typeof v !== 'string' || cpLen(v) > max) BAD(); return v; }
+  // 形の合わない控えは null（呼ぶ側で予備に写し、上書きしない）
+  function sanitizeStore(o) {
+    try {
+      if (!o || typeof o !== 'object' || !Array.isArray(o.recs) || o.recs.length > LIM.recs || !o.form || typeof o.form !== 'object') return null;
+      var d = emptyStore();
+      d.from = str(o.from, 100);
+      var f = o.form;
+      if (f.sents != null && (!Array.isArray(f.sents) || f.sents.length > 50)) return null;
+      d.form = { text: str(f.text, 4000), sents: (f.sents || []).map(function (s) { return str(s, 1000); }), name: str(f.name, 100), item: str(f.item, 100),
+        date: str(f.date, 10) || todayIso(), places: Number.isInteger(f.places) ? f.places & ALL_BITS : 0 };
+      for (var i = 0; i < o.recs.length; i++) {
+        var r = o.recs[i];
+        if (!r || typeof r !== 'object' || !Array.isArray(r.sents) || !r.sents.length || r.sents.length > LIM.sents) return null;
+        var sents = r.sents.map(function (s) { return str(s, LIM.sent); });
+        var places = Number.isInteger(r.places) ? r.places & ALL_BITS : 0, okPlaces = Number.isInteger(r.okPlaces) ? r.okPlaces & ALL_BITS : 0;
+        var ans = Array.isArray(r.ans) && r.ans.length === sents.length && r.ans.every(function (a) { return a === 1 || a === 2; }) ? r.ans.slice() : null;
+        var nameMode = [1, 2, 3].indexOf(r.nameMode) >= 0 ? r.nameMode : 0;
+        // 【レビュー①🟡1】聞いた場所の外のOKや、名前の出し方のない返事は「返事待ち」に戻す
+        var status = ans && nameMode && (okPlaces & ~places) === 0 && STATUS_TEXT[r.status] && r.status !== 'wait' ? r.status : 'wait';
+        d.recs.push({ name: str(r.name, 100), item: str(r.item, 100), date: str(r.date, 10), places: places, sents: sents, from: str(r.from, 100),
+          status: status, ans: status === 'wait' ? null : ans, nameMode: status === 'wait' ? 0 : nameMode, okPlaces: status === 'wait' ? 0 : okPlaces });
+      }
+      return d;
+    } catch (e) { return null; }
+  }
+
+  return {
+    KEY: KEY, LIM: LIM, HASH_MAX: HASH_MAX, URL_MAX: URL_MAX, PLACES: PLACES, NAME_MODES: NAME_MODES, NO_NAME: NO_NAME, STATUS_TEXT: STATUS_TEXT,
+    clean: clean, cpLen: cpLen, nameKey: nameKey, blockedReason: blockedReason, validDate: validDate, dateMd: dateMd, todayIso: todayIso,
+    splitSentences: splitSentences, joinAt: joinAt, stripHonor: stripHonor, initialOf: initialOf, hasInitial: hasInitial, displayName: displayName, placeLabels: placeLabels, joinJa: joinJa,
+    toConfig: toConfig, sendText: sendText, replyText: replyText, statusOf: statusOf, cardGroups: cardGroups,
+    encode: encode, encodeReply: encodeReply, worstReply: worstReply, decodeHash: decodeHash,
+    blankForm: blankForm, emptyStore: emptyStore, sampleForm: sampleForm, addAsked: addAsked, importReply: importReply, sanitizeStore: sanitizeStore
+  };
+})();
+if (typeof module !== 'undefined') module.exports = KO;
+</script>
+
+<script id="card">
+/* カード画像（1080×1080）を canvas に描く。文字は fillText だけで描く */
+var CARD = (function () {
+  var W = 1080, PAD = 96, TOP = 214, BOTTOM_RULE = 860;
+  var THEMES = {
+    kinari: { label: '生成り', bg: '#F6F1E7', ink: '#2B2620', sub: '#5E554A', accent: '#1F6F78', rule: '#D9CFBF' },
+    sumi: { label: '墨', bg: '#22262B', ink: '#F3F1EC', sub: '#C3C7CC', accent: '#7FC8CF', rule: '#43494F' },
+    kimidori: { label: '黄緑', bg: '#EEF5DC', ink: '#24301A', sub: '#4E5B40', accent: '#4F7A1F', rule: '#CBD9AE' }
+  };
+  var FONT = '"Hiragino Sans","Yu Gothic","YuGothic","BIZ UDPGothic","Noto Sans JP",sans-serif';
+  // 行頭に来てはいけない文字は、前の行の末尾に付ける
+  var NO_START = '、。，．,.・：；:;？！?!）)］]｝}」』〉》】”’ー…‥ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ々〜';
+  // 【レビュー①🟡8】ぶら下げは1文字まで。続く文字は改行して、右の余白からはみ出さないようにする
+  function wrap(ctx, text, maxW) {
+    var lines = [], cur = '', hang = 0;
+    Array.from(text).forEach(function (c) {
+      var over = cur && ctx.measureText(cur + c).width > maxW;
+      if (over && NO_START.indexOf(c) >= 0 && hang < 1) { cur += c; hang++; }
+      else if (over) { lines.push(cur); cur = c; hang = 0; }
+      else cur += c;
+    });
+    if (cur) lines.push(cur);
+    return lines;
+  }
+  // groups: 文のまとまり（間は「……」）。返り値 { ok, size }
+  function layout(ctx, groups) {
+    var areaH = BOTTOM_RULE - 48 - TOP, full = W - PAD * 2;
+    // 下限26px: 400字を1つのまとまりで載せても収まる大きさ（ブラウザで実測）
+    for (var size = 58; size >= 26; size -= 2) {
+      ctx.font = '600 ' + size + 'px ' + FONT;
+      // ぶら下げる1文字ぶんを最初から空けておく
+      var lh = Math.round(size * 1.72), blocks = groups.map(function (g) { return wrap(ctx, g, full - size); });
+      var wide = blocks.some(function (b) { return b.some(function (l) { return ctx.measureText(l).width > full; }); });
+      var n = blocks.reduce(function (s, b) { return s + b.length; }, 0) + (groups.length - 1);
+      if (!wide && n * lh <= areaH) return { ok: true, size: size, lh: lh, blocks: blocks, h: n * lh };
+    }
+    return { ok: false };
+  }
+  function draw(canvas, data, themeKey) {
+    var t = THEMES[themeKey] || THEMES.kinari;
+    canvas.width = W; canvas.height = W;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = t.bg; ctx.fillRect(0, 0, W, W);
+    ctx.textBaseline = 'top';
+    // 見出し
+    ctx.fillStyle = t.accent; ctx.fillRect(PAD, 104, 72, 8);
+    ctx.font = '700 32px ' + FONT; ctx.fillText('いただいた感想', PAD, 136);
+    var L = layout(ctx, data.groups);
+    if (!L.ok) return { ok: false };
+    ctx.font = '600 ' + L.size + 'px ' + FONT; ctx.fillStyle = t.ink;
+    var y = TOP + Math.max(0, Math.round((BOTTOM_RULE - 48 - TOP - L.h) / 2));
+    L.blocks.forEach(function (lines, gi) {
+      if (gi > 0) { ctx.fillStyle = t.sub; ctx.fillText('……', PAD, y); ctx.fillStyle = t.ink; y += L.lh; }
+      lines.forEach(function (line) { ctx.fillText(line, PAD, y); y += L.lh; });
+    });
+    // 名前と商品
+    ctx.fillStyle = t.rule; ctx.fillRect(PAD, BOTTOM_RULE, W - PAD * 2, 3);
+    ctx.fillStyle = t.ink; ctx.font = '700 42px ' + FONT; ctx.fillText(data.name, PAD, BOTTOM_RULE + 34, W - PAD * 2);
+    if (data.item) { ctx.fillStyle = t.sub; ctx.font = '500 32px ' + FONT; ctx.fillText(data.item, PAD, BOTTOM_RULE + 96, W - PAD * 2); }
+    return { ok: true, size: L.size };
+  }
+  return { THEMES: THEMES, draw: draw, W: W };
+})();
+</script>
+
+<script id="ui">
+(function () {
+  var app = document.getElementById('app');
+  var uid = 0;
+  var RULE_NOTE = '感想を広告や販売ページに載せるときの表示の決まり（効果の言い方など）は、消費者庁の案内などで確認してください。このページは、載せてよいかの判断をするものではありません。';
+
+  function h(tag, a, kids) {
+    var e = document.createElement(tag);
+    if (a) Object.keys(a).forEach(function (k) {
+      var v = a[k];
+      if (v == null || v === false) return;
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+      else if (v === true) e.setAttribute(k, '');
+      else e.setAttribute(k, v);
+    });
+    (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return e;
+  }
+  function baseUrl() { return location.href.split('#')[0].split('?')[0]; }
+  function copyText(text, done) {
+    function fallback() {
+      var ok = false;
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;font-size:16px';
+        document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+        ok = document.execCommand('copy'); document.body.removeChild(ta);
+      } catch (e) { ok = false; }
+      done(ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try { navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); } catch (e) { fallback(); }
+    } else fallback();
+  }
+  function selectAll(ta) { try { ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length); } catch (e) { } }
+  function fitHeight(ta) { if (ta.isConnected) { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 4) + 'px'; } }
+  function copyPanel(title, note, text, btnText) {
+    var ta = h('textarea', { readonly: true, class: 'msgbox', rows: 6, 'aria-label': title });
+    ta.value = text;
+    var msg = h('p', { class: 'okmsg', role: 'status' });
+    var cp = h('button', { type: 'button', class: 'primary', text: btnText || '文をコピー' });
+    cp.addEventListener('click', function () {
+      copyText(ta.value, function (ok) {
+        if (ok) msg.textContent = 'コピーしました。';
+        else { msg.textContent = 'コピーできませんでした。上の文を長押しして、コピーしてください。'; selectAll(ta); }
+      });
+    });
+    var p = h('div', { class: 'panel' }, [h('h3', { text: title }), note ? h('p', { class: 'small', text: note }) : null, ta, h('div', { class: 'stack' }, [cp]), msg]);
+    p.setText = function (t) { ta.value = t; msg.textContent = ''; fitHeight(ta); };
+    return p;
+  }
+  function linkPanel(title, note) {
+    var lenEl = h('p', { class: 'len' }), urlTa = h('textarea', { readonly: true, rows: 4, class: 'urlbox', 'aria-label': title });
+    var cpBtn = h('button', { type: 'button', class: 'primary', text: 'URLをコピー' });
+    var shBtn = h('button', { type: 'button', text: '共有' });
+    var cpMsg = h('p', { class: 'okmsg', role: 'status' });
+    var cur = '';
+    shBtn.hidden = typeof navigator.share !== 'function';
+    cpBtn.addEventListener('click', function () {
+      copyText(cur, function (ok) {
+        if (ok) cpMsg.textContent = 'コピーしました。DMやメールに貼って送ってください。';
+        else { cpMsg.textContent = 'コピーできませんでした。上のURLを長押しして、コピーしてください。'; selectAll(urlTa); }
+      });
+    });
+    shBtn.addEventListener('click', function () {
+      var p; try { p = navigator.share({ url: cur }); } catch (e) { cpMsg.textContent = '共有できませんでした。URLをコピーしてください。'; return; }
+      if (p && p.catch) p.catch(function (e) { if (!e || e.name !== 'AbortError') cpMsg.textContent = '共有できませんでした。URLをコピーしてください。'; });
+    });
+    var box = h('div', { class: 'panel' }, [h('h3', { text: title }), lenEl, urlTa, h('div', { class: 'btns' }, [cpBtn, shBtn]), cpMsg, note ? h('p', { class: 'small', text: note }) : null]);
+    box.hidden = true;
+    box.setUrl = function (url) {
+      var len = Array.from(url).length, over = len > KO.URL_MAX;
+      lenEl.textContent = 'URLの長さ: ' + len.toLocaleString('ja-JP') + ' / ' + KO.URL_MAX.toLocaleString('ja-JP') + '文字' + (over ? '（長すぎます。感想を短くしてください）' : '');
+      cur = over ? '' : url; urlTa.value = cur; cpMsg.textContent = '';
+      cpBtn.disabled = over; shBtn.disabled = over;
+      box.hidden = false;
+      return !over;
+    };
+    return box;
+  }
+  function errorBox(list) {
+    var b = h('div', { class: 'errors', role: 'alert' });
+    b.appendChild(h('strong', { text: '次の点を直してください' }));
+    b.appendChild(h('ul', null, list.map(function (m) { return h('li', { text: m }); })));
+    return b;
+  }
+
+  /* ---------------- 画像の保存（Day090と同じ経路） ---------------- */
+  function isIOS(ua, platform, touchPoints) { return /iPhone|iPad|iPod/.test(ua || '') || (platform === 'MacIntel' && (touchPoints || 0) > 1); }
+  window.KO_isIOS = isIOS;
+  var ios = isIOS(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
+  function dataUrlToFile(url, name) {
+    var bin = atob(url.split(',')[1]), u8 = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return new File([u8], name, { type: 'image/png' });
+  }
+  function savePanel(canvas, name) {
+    var msg = h('p', { class: 'okmsg', role: 'status' }), lp = h('div');
+    function showLongPress(why) {
+      lp.textContent = '';
+      lp.appendChild(h('p', { class: 'small', text: (why ? why + ' ' : '') + (ios ? '下の画像を長押しして、「写真に追加」または「画像を保存」を選んでください。' : '下の画像を右クリック（長押し）して、画像を保存してください。') }));
+      var im = h('img', { alt: 'カード画像（長押しで保存）' }); im.src = canvas.toDataURL('image/png');
+      lp.appendChild(h('div', { class: 'cardwrap' }, [im]));
+    }
+    var save = h('button', { type: 'button', class: 'primary', text: '画像を保存' });
+    save.addEventListener('click', function () {
+      msg.textContent = ''; var fname = name();
+      if (ios) {
+        var file = null;
+        // 利用者の操作中に同期的に作る（toBlob など非同期の処理をはさまない）
+        try { file = dataUrlToFile(canvas.toDataURL('image/png'), fname); } catch (e) { }
+        if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file] }).then(function () { msg.textContent = '共有メニューを閉じました。保存先を選べていれば保存されています。'; })
+            .catch(function (e) { if (e && e.name === 'AbortError') msg.textContent = '共有メニューを閉じました。保存はされていません。'; else showLongPress('共有メニューを開けませんでした。'); });
+          return;
+        }
+        showLongPress('この端末では共有メニューを使えません。');
+        return;
+      }
+      var a = document.createElement('a');
+      if (!('download' in a)) { showLongPress('このブラウザではそのまま保存できません。'); return; }
+      a.href = canvas.toDataURL('image/png'); a.download = fname;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      msg.textContent = 'ダウンロードを試しました（' + fname + '）。保存されないときは「画像を表示して保存」を使ってください（LINEなどアプリ内のブラウザでは保存できないことがあります）。';
+    });
+    var show = h('button', { type: 'button', text: '画像を表示して保存', onclick: function () { showLongPress(''); } });
+    var box = h('div', null, [h('div', { class: 'stack' }, [save, show]), msg, lp]);
+    box.clear = function () { lp.textContent = ''; msg.textContent = ''; };
+    return box;
+  }
+
+  /* ---------------- 下書き ---------------- */
+  var storageOk = (function () { try { localStorage.setItem(KO.KEY + '-probe', '1'); localStorage.removeItem(KO.KEY + '-probe'); return true; } catch (e) { return false; } })();
+  var broken = false, backedUp = false, backupFor = null;
+  function loadStore() {
+    broken = false;
+    try {
+      var s = localStorage.getItem(KO.KEY);
+      if (s) {
+        var d = null;
+        try { d = KO.sanitizeStore(JSON.parse(s)); } catch (e) { d = null; }
+        if (d) return d;
+        // 読めない控えは消さずに予備へ写す（Day093と同じ）
+        // 【レビュー①🟡9】同じ中身は1回だけ写す（開くたびに予備が増えないように）
+        if (backupFor !== s) {
+          backedUp = false;
+          try {
+            var same = false;
+            for (var k = 0; k < localStorage.length; k++) { var key = localStorage.key(k); if (key && key.indexOf(KO.KEY + '-backup') === 0 && localStorage.getItem(key) === s) same = true; }
+            if (!same) {
+              if (localStorage.getItem(KO.KEY + '-backup') === null) localStorage.setItem(KO.KEY + '-backup', s);
+              else localStorage.setItem(KO.KEY + '-backup-' + Date.now(), s);
+            }
+            backedUp = true; backupFor = s;
+          } catch (e2) { backedUp = false; }
+        }
+        broken = true;
+      }
+    } catch (e) { }
+    return KO.emptyStore();
+  }
+  function saveStore(d) { if (broken) return; try { localStorage.setItem(KO.KEY, JSON.stringify(d)); } catch (e) { storageOk = false; } }
+
+  function textField(obj, key, label, hint, max, ph, onchange) {
+    var id = 'f' + (++uid);
+    var input = h('input', { type: 'text', id: id, maxlength: max, autocomplete: 'off', placeholder: ph || null });
+    input.value = obj[key];
+    input.addEventListener('input', function () { obj[key] = input.value; onchange && onchange(); });
+    return h('div', null, [h('label', { class: 'f', for: id }, [label, hint ? h('span', { class: 'hint', text: ' ' + hint }) : null]), input]);
+  }
+
+  /* ---------------- 作る画面 ---------------- */
+  function renderMake() {
+    document.title = 'お客さまの声の掲載OKリンク';
+    app.textContent = '';
+    var store = loadStore(), form = store.form;
+    function save() { saveStore(store); }
+    app.appendChild(h('h1', { text: 'お客さまの声の掲載OKリンク' }));
+    app.appendChild(h('p', { class: 'lead', text: 'もらった感想を貼り付けると、1文ずつに区切ります。リンクを送ると、相手が文ごとに「載せてOK」「載せないで」と名前の出し方を選んで送り返せます。返事から、選ばれた範囲だけのカード画像を作れます。ページの下のボタンで見本を入れられます。' }));
+    if (!storageOk) app.appendChild(h('div', { class: 'errors', text: 'この端末では入力を保存できません。ページを閉じると入力が消えます。' }));
+    if (broken) app.appendChild(h('div', { class: 'errors' }, [
+      h('p', { text: 'この端末に残っていた控えが読み取れませんでした。元の控えは消さずに予備として残してあります（いまの画面での入力は保存しません）。' }),
+      h('button', { type: 'button', text: '予備に残したまま、新しく始める', onclick: function () {
+        if (!backedUp) { alert('予備を残せなかったため、新しく始められません。'); return; }
+        if (!confirm('読み取れなかった控えは予備として残し、空の状態から新しく始めます。よろしいですか？')) return;
+        broken = false; saveStore(KO.emptyStore()); renderMake();
+      } })
+    ]));
+
+    var layout = h('div', { class: 'layout' }), left = h('div'), right = h('div', { class: 'sticky' });
+    layout.appendChild(left); layout.appendChild(right); app.appendChild(layout);
+
+    // 感想
+    var voiceBox = h('div', { class: 'panel' }), whoBox = h('div', { class: 'panel' });
+    left.appendChild(voiceBox); left.appendChild(whoBox);
+    var tid = 'f' + (++uid);
+    var ta = h('textarea', { id: tid, rows: 6, placeholder: 'DMやメールでもらった感想を、そのまま貼り付けてください' });
+    ta.value = form.text;
+    var sentBox = h('div');
+    ta.addEventListener('input', function () { form.text = ta.value; form.sents = KO.splitSentences(ta.value); buildSents(); invalidate(); save(); });
+    voiceBox.appendChild(h('h2', { text: 'もらった感想' }));
+    voiceBox.appendChild(h('label', { class: 'f', for: tid }, ['感想', h('span', { class: 'hint', text: ' （400字・12文まで。文は書き換えずに。カード1枚で読みやすいのは200字くらいまで）' })]));
+    voiceBox.appendChild(ta);
+    voiceBox.appendChild(sentBox);
+
+    function buildSents() {
+      sentBox.textContent = '';
+      var s = form.sents;
+      if (!s.length) { sentBox.appendChild(h('p', { class: 'small', text: '貼り付けると、ここに1文ずつ並びます。' })); return; }
+      var total = s.reduce(function (n, x) { return n + KO.cpLen(x); }, 0);
+      sentBox.appendChild(h('p', { class: total > KO.LIM.text || s.length > KO.LIM.sents ? 'errors' : 'small', text: s.length + '文・' + total + '字（相手には、この区切りで見えます）' }));
+      var ul = h('ol', { class: 'sents' });
+      s.forEach(function (t, i) {
+        var head = h('div', { class: 'shead' }, [h('span', { class: 'snum', text: (i + 1) + '文目' })]);
+        if (i < s.length - 1) head.appendChild(h('button', { type: 'button', text: '次の文とつなげる', 'aria-label': (i + 1) + '文目と' + (i + 2) + '文目をつなげる', onclick: function () {
+          form.sents = KO.joinAt(form.sents, i); buildSents(); invalidate(); save();
+        } }));
+        ul.appendChild(h('li', { class: 'scard' }, [head, h('p', { class: 'stext', text: t })]));
+      });
+      sentBox.appendChild(ul);
+    }
+
+    // 相手と場所
+    whoBox.appendChild(h('h2', { text: '相手と、載せたい場所' }));
+    // 【タダス検算②🟡3】880px以上の2カラムでは欄が狭くなるので、呼び名と商品は縦に並べる
+    whoBox.appendChild(h('div', null, [
+      textField(form, 'name', '相手の呼び名', '（10字まで・フルネームではなく、ふだんの呼び名で）', KO.LIM.name, '例 ハナ', function () { invalidate(); save(); showIni(); }),
+      textField(form, 'item', 'どの商品の感想か', '（任意・20字まで）', KO.LIM.item, '例 Threads運用ノート', function () { invalidate(); save(); })
+    ]));
+    // 【レビュー①🟡5】相手の画面で、名前がどう見えるかを先に出す
+    var iniNote = h('p', { class: 'small', role: 'status' });
+    whoBox.appendChild(iniNote);
+    function showIni() {
+      var n = KO.stripHonor(form.name);
+      iniNote.textContent = !n ? '' : KO.hasInitial(n) ? '相手の画面では「' + KO.displayName(n, 1) + '」「' + KO.displayName(n, 2) + '」「' + KO.NO_NAME + '」から選べます。'
+        : '漢字などで始まる呼び名は、イニシャルを選べません（1文字目がそのまま出るため）。相手の画面では「' + KO.displayName(n, 1) + '」か「' + KO.NO_NAME + '」から選べます。';
+    }
+    showIni();
+    var did = 'f' + (++uid), dateIn = h('input', { type: 'date', id: did, min: '2000-01-01', max: '2099-12-31' });
+    dateIn.value = form.date;
+    ['input', 'change'].forEach(function (ev) { dateIn.addEventListener(ev, function () { form.date = dateIn.value; invalidate(); save(); }); });
+    whoBox.appendChild(h('label', { class: 'f', for: did, text: 'もらった日' }));
+    whoBox.appendChild(dateIn);
+    var pl = h('fieldset', { class: 'chk cols' }, [h('legend', { text: '載せたい場所（1つ以上）' })]);
+    KO.PLACES.forEach(function (p) {
+      var input = h('input', { type: 'checkbox', value: String(p.bit) });
+      input.checked = !!(form.places & p.bit);
+      input.addEventListener('change', function () { form.places = input.checked ? form.places | p.bit : form.places & ~p.bit; invalidate(); save(); });
+      pl.appendChild(h('label', null, [input, h('span', { text: p.label })]));
+    });
+    whoBox.appendChild(pl);
+    whoBox.appendChild(textField(store, 'from', 'あなたの名前', '（任意・20字まで。相手の画面に「○○さんから」と出ます）', KO.LIM.from, '例 みち', function () { invalidate(); save(); }));
+
+    var makeBtn = h('button', { type: 'button', class: 'primary', text: '載せていいか聞くリンクを作る' });
+    var linkErr = h('div');
+    var askLink = linkPanel('載せていいか聞くリンク', 'リンクには、貼り付けた感想が入ります。相手はリンクを開いて、文ごとに選んだ返事のリンクを送り返せます。');
+    var sendMsg = copyPanel('相手に送る文', 'DMやメールに貼って送れます。リンクを作ると、文の最後にリンクが付きます。', '', '送る文をコピー');
+    sendMsg.hidden = true;
+    left.appendChild(h('div', { class: 'stack' }, [makeBtn]));
+    left.appendChild(linkErr); left.appendChild(askLink); left.appendChild(sendMsg);
+    function invalidate() { askLink.hidden = true; sendMsg.hidden = true; linkErr.textContent = ''; }
+
+    makeBtn.addEventListener('click', function () {
+      var r = KO.toConfig(form, store.from);
+      linkErr.textContent = '';
+      if (!r.cfg) { invalidate(); linkErr.appendChild(errorBox(r.errors)); if (linkErr.scrollIntoView) linkErr.scrollIntoView({ block: 'nearest' }); return; }
+      var url = baseUrl() + '#' + KO.encode(r.cfg);
+      // 相手が作る返事のリンクのほうが長い。返事が上限を超えるなら、ここで止める
+      var worst = Array.from(baseUrl() + '#' + KO.worstReply(r.cfg)).length;
+      if (worst > KO.URL_MAX) { invalidate(); linkErr.appendChild(errorBox(['感想が長く、相手が作る返事のリンクが長くなりすぎます。感想を短くしてください（返事のリンク ' + worst.toLocaleString('ja-JP') + ' / ' + KO.URL_MAX.toLocaleString('ja-JP') + '文字）'])); return; }
+      var ok = askLink.setUrl(url);
+      sendMsg.hidden = false;
+      sendMsg.setText(KO.sendText(r.cfg, ok ? url : ''));
+      var res = KO.addAsked(store, r.cfg); save(); buildRecs();
+      if (res === 'full') linkErr.appendChild(h('p', { class: 'small', text: '声の控えが' + KO.LIM.recs + '件に達しているため、今回の分は控えに残していません。' }));
+      if (askLink.scrollIntoView) askLink.scrollIntoView({ block: 'nearest' });
+    });
+
+    // 声の控え
+    var recBox = h('div');
+    right.appendChild(h('h2', { text: '声の控え' }));
+    right.appendChild(h('p', { class: 'small', text: '誰に・いつ・どこまでOKをもらったかを、この端末に残します。返事のリンクを開いて「控えに取り込む」と、状態が変わります。' }));
+    right.appendChild(recBox);
+    right.appendChild(h('p', { class: 'rule', text: RULE_NOTE }));
+    function buildRecs() {
+      recBox.textContent = '';
+      if (!store.recs.length) { recBox.appendChild(h('p', { class: 'small', text: 'まだ控えはありません。聞くリンクを作ると「返事待ち」で残ります。' })); return; }
+      var ul = h('ul', { class: 'recs' });
+      store.recs.forEach(function (r, i) {
+        var tagCls = r.status === 'wait' ? 'wait' : r.status === 'no' ? 'no' : 'ok';
+        var meta = [r.item, KO.dateMd(r.date) ? KO.dateMd(r.date) + 'にもらった感想' : '', r.sents.length + '文'].filter(Boolean).join('・');
+        var kids = [h('div', { class: 'r1' }, [h('span', { class: 'rname', text: KO.stripHonor(r.name) + 'さん' }), h('span', { class: 'tag ' + tagCls, text: KO.STATUS_TEXT[r.status] })]), h('div', { class: 'r2', text: meta })];
+        if (r.status !== 'wait' && r.status !== 'no') {
+          var okN = r.ans.filter(function (a) { return a === 1; }).length;
+          kids.push(h('div', { class: 'r2', text: '載せてよい文 ' + okN + '/' + r.sents.length + '・お名前: ' + KO.displayName(r.name, r.nameMode) + '・場所: ' + KO.placeLabels(r.okPlaces).join('・') }));
+        }
+        var foot = [];
+        if (r.status === 'ok' || r.status === 'part') foot.push(h('button', { type: 'button', text: 'カードを作る', onclick: function () {
+          var cfg = { from: r.from, name: r.name, item: r.item, date: r.date, places: r.places, sents: r.sents };
+          location.hash = KO.encodeReply(cfg, { ans: r.ans, nameMode: r.nameMode, okPlaces: r.okPlaces });
+        } }));
+        foot.push(h('button', { type: 'button', text: '消す', 'aria-label': KO.stripHonor(r.name) + 'さんの控えを消す', onclick: function () {
+          if (!confirm(KO.stripHonor(r.name) + 'さんの控え（' + KO.STATUS_TEXT[r.status] + '）を消します。よろしいですか？')) return;
+          store.recs.splice(i, 1); save(); buildRecs();
+        } }));
+        kids.push(h('div', { class: 'rfoot' }, foot));
+        ul.appendChild(h('li', { class: 'rcard' }, kids));
+      });
+      recBox.appendChild(ul);
+    }
+
+    app.appendChild(h('div', { class: 'btns' }, [
+      h('button', { type: 'button', text: '見本を入れる（講座の感想）', disabled: broken, onclick: function () {
+        if ((KO.clean(form.text) || KO.clean(form.name)) && !confirm('いまの感想と相手の入力を、見本に置き換えます。よろしいですか？')) return;
+        store.form = form = KO.sampleForm(); if (!KO.clean(store.from)) store.from = 'みち';
+        save(); renderMake();
+      } }),
+      h('button', { type: 'button', text: '入力を空にする', disabled: broken, onclick: function () {
+        if (!confirm('いまの感想と相手の入力を消します（声の控えは残ります）。よろしいですか？')) return;
+        store.form = KO.blankForm(); save(); renderMake();
+      } })
+    ]));
+    app.appendChild(h('ul', { class: 'notes' }, [
+      h('li', { text: '相手が選べるのは「載せる・載せない」だけで、文は書き換えられません。誤字を直したいときは、直してから改めてリンクを送ってください。' }),
+      h('li', { text: 'リンク・メールアドレス・電話番号らしい文字は入れられないようにしています（すべての言い方は防げません）。' }),
+      h('li', { text: '入力した内容を当サイトのサーバーに保存する仕組みはありません。声の控えは、この端末のブラウザに残ります。リンクには感想の内容が入るので、受け取った人はその内容を見られます。' })
+    ]));
+    buildSents(); buildRecs();
+  }
+
+  /* ---------------- 答える画面（感想をくれた人が見る） ---------------- */
+  function renderAsk(cfg) {
+    document.title = '感想を載せてよいかの確認';
+    app.textContent = '';
+    var page = h('div', { class: 'viewpage' }); app.appendChild(page);
+    var ans = cfg.sents.map(function () { return 0; }), mode = 0, okp = 0;
+    page.appendChild(h('div', { class: 'notice', text: 'このページは、リンクを作った方が、あなたの感想を載せてよいか確かめるためのものです。当サイトは内容を確認していません。ログインや個人情報の入力は求めません。' }));
+    page.appendChild(h('h1', { class: 'v-title', text: (cfg.from ? cfg.from + 'さんから、' : '') + '感想を載せてよいかの確認です' }));
+    page.appendChild(h('p', { class: 'v-sub', text: (cfg.item ? '「' + cfg.item + '」の' : '') + '感想（' + KO.dateMd(cfg.date) + 'にいただいたもの）を、' + KO.joinJa(KO.placeLabels(cfg.places)) + 'で紹介したいそうです。文ごとに選んでください。文は書き換えられません。' }));
+    var ul = h('ol', { class: 'sents' });
+    cfg.sents.forEach(function (t, i) {
+      var okB = h('button', { type: 'button', class: 'a-ok', 'aria-pressed': 'false', text: '✓ 載せてOK' });
+      var noB = h('button', { type: 'button', class: 'a-no', 'aria-pressed': 'false', text: '× 載せないで' });
+      okB.addEventListener('click', function () { ans[i] = 1; update(); });
+      noB.addEventListener('click', function () { ans[i] = 2; update(); });
+      var card = h('li', { class: 'scard' }, [h('div', { class: 'shead' }, [h('span', { class: 'snum', text: (i + 1) + '文目' })]), h('p', { class: 'stext', text: t }),
+        h('div', { class: 'answer', role: 'group', 'aria-label': (i + 1) + '文目の返事' }, [okB, noB])]);
+      card.sync = function () {
+        okB.setAttribute('aria-pressed', ans[i] === 1 ? 'true' : 'false');
+        noB.setAttribute('aria-pressed', ans[i] === 2 ? 'true' : 'false');
+        card.className = 'scard' + (ans[i] === 1 ? ' is-ok' : ans[i] === 2 ? ' is-no' : '');
+      };
+      ul.appendChild(card);
+    });
+    page.appendChild(ul);
+    page.appendChild(h('div', { class: 'btns' }, [h('button', { type: 'button', text: 'どれも載せないでほしい', onclick: function () {
+      ans = ans.map(function () { return 2; }); okp = 0; if (!mode) mode = 3; syncInputs(); update();
+    } })]));
+    // 名前の出し方
+    var seg = h('fieldset', { class: 'seg' }, [h('legend', { text: 'お名前の出し方' })]);
+    var radios = [];
+    (KO.hasInitial(cfg.name) ? [1, 2, 3] : [1, 3]).forEach(function (m) {
+      var input = h('input', { type: 'radio', name: 'nm' + uid, value: String(m) });
+      input.addEventListener('change', function () { if (input.checked) { mode = m; update(); } });
+      radios.push(input);
+      seg.appendChild(h('label', null, [input, h('span', { text: KO.NAME_MODES[m] + '（' + KO.displayName(cfg.name, m) + '）' })]));
+    });
+    page.appendChild(h('div', { class: 'panel' }, [seg]));
+    // 場所
+    var pl = h('fieldset', { class: 'chk' }, [h('legend', { text: '載せてよい場所（外した場所には載せません）' })]);
+    var checks = [];
+    KO.PLACES.forEach(function (p) {
+      if (!(cfg.places & p.bit)) return;
+      var input = h('input', { type: 'checkbox', value: String(p.bit) });
+      input.addEventListener('change', function () { okp = input.checked ? okp | p.bit : okp & ~p.bit; update(); });
+      checks.push([input, p.bit]);
+      pl.appendChild(h('label', null, [input, h('span', { text: p.label })]));
+    });
+    page.appendChild(h('div', { class: 'panel' }, [pl]));
+    function syncInputs() { radios.forEach(function (r) { r.checked = mode === +r.value; }); checks.forEach(function (c) { c[0].checked = !!(okp & c[1]); }); }
+    // 見本
+    var cv = h('canvas', { width: 1080, height: 1080, 'aria-label': 'いまの選び方で載る形の見本' });
+    var prevNote = h('p', { class: 'small' });
+    page.appendChild(h('div', { class: 'panel' }, [h('h2', { text: 'いまの選び方で、こう載ります' }), prevNote, h('div', { class: 'cardwrap preview' }, [cv])]));
+    var progress = h('p', { class: 'progress', role: 'status' });
+    page.appendChild(progress);
+    var make = h('button', { type: 'button', class: 'primary', text: '返事のリンクを作る' });
+    var err = h('div');
+    var replyLink = linkPanel('返事のリンク', 'このリンクを、確認を送ってくれた方に送り返してください。この画面での答えは、どこにも保存されません。');
+    var replyMsg = copyPanel('返事の文', 'DMやメールに貼って送れます。', '', '返事の文をコピー');
+    replyMsg.hidden = true;
+    page.appendChild(h('div', { class: 'stack' }, [make]));
+    page.appendChild(err); page.appendChild(replyLink); page.appendChild(replyMsg);
+    page.appendChild(h('p', { class: 'rule', text: '選んだ内容は、リンクを作った方への返事として渡ります。あとで考えが変わったときは、その方に直接伝えてください。' }));
+    page.appendChild(h('button', { type: 'button', class: 'linklike', text: '自分も感想の掲載OKリンクを作る', onclick: goMake }));
+    function update() {
+      [].forEach.call(ul.children, function (c) { c.sync(); });
+      var left = ans.filter(function (a) { return a === 0; }).length;
+      var parts = ['選んだ文 ' + (ans.length - left) + ' / ' + ans.length];
+      if (left) parts.push('まだ選んでいない文が' + left + 'つあります');
+      if (!mode) parts.push('お名前の出し方を選んでください');
+      if (!okp && ans.some(function (a) { return a === 1; })) parts.push('載せてよい場所を選んでいません（このままだと、どこにも載せない返事になります）');
+      progress.textContent = parts.join('。');
+      var groups = KO.cardGroups(cfg.sents, ans);
+      var ctx = cv.getContext('2d');
+      if (!groups.length || !okp) { cv.hidden = true; prevNote.textContent = groups.length ? '載せてよい場所が選ばれていないため、載りません。' : '「載せてOK」の文がまだありません。'; }
+      else {
+        var r = CARD.draw(cv, { groups: groups, name: KO.displayName(cfg.name, mode || 3), item: cfg.item }, 'kinari');
+        cv.hidden = !r.ok; prevNote.textContent = r.ok ? '「載せてOK」の文だけが並びます（間の文を外したところは「……」でつなぎます）。' + (mode ? '' : 'お名前は、選ぶまで「' + KO.NO_NAME + '」で表示しています。') : '文が多く、1枚に収まりません。';
+      }
+      replyLink.hidden = true; replyMsg.hidden = true; err.textContent = '';
+    }
+    make.addEventListener('click', function () {
+      err.textContent = '';
+      var e = [];
+      if (ans.some(function (a) { return a === 0; })) e.push('まだ選んでいない文があります。文ごとに「載せてOK」か「載せないで」を選んでください');
+      if (!mode) e.push('お名前の出し方を選んでください');
+      if (e.length) { replyLink.hidden = true; replyMsg.hidden = true; err.appendChild(errorBox(e)); return; }
+      var reply = { ans: ans.slice(), nameMode: mode, okPlaces: okp };
+      var url = baseUrl() + '#' + KO.encodeReply(cfg, reply);
+      var ok = replyLink.setUrl(url);
+      replyMsg.hidden = false;
+      replyMsg.setText(KO.replyText(cfg, reply, ok ? url : ''));
+      if (replyLink.scrollIntoView) replyLink.scrollIntoView({ block: 'nearest' });
+    });
+    update();
+  }
+
+  /* ---------------- 返事を見る画面（作った人が見る） ---------------- */
+  function renderReply(cfg, reply) {
+    var who = KO.stripHonor(cfg.name) + 'さん';
+    document.title = who + 'からの返事｜感想の掲載';
+    app.textContent = '';
+    var page = h('div', { class: 'viewpage' }); app.appendChild(page);
+    // 【レビュー①🟡6】返事が本人から届いたものかは、このページでは分からないことを常に出す
+    page.appendChild(h('div', { class: 'notice', text: 'このページは、リンクに入っている内容を表示しているだけです。返事が本人から届いたものかは、当サイトでは確かめていません。' }));
+    page.appendChild(h('h1', { class: 'v-title', text: who + 'からの返事（リンクの内容）' }));
+    if (cfg.item) page.appendChild(h('p', { class: 'v-sub', text: '「' + cfg.item + '」の感想' }));
+    var groups = KO.cardGroups(cfg.sents, reply.ans), status = KO.statusOf(reply);
+    var fname = function () { return 'koe-card-' + cfg.date + '.png'; };
+    if (status === 'no') {
+      page.appendChild(h('div', { class: 'panel' }, [h('p', { text: groups.length ? who + 'は、載せてよい場所を選びませんでした。今回は載せないでおきましょう。' : who + 'は、今回は載せないことを選びました。' })]));
+    } else {
+      var cv = h('canvas', { width: 1080, height: 1080, 'aria-label': 'カード画像' });
+      var theme = 'kinari', sp = savePanel(cv, fname);
+      var cardErr = h('div');
+      var seg = h('fieldset', { class: 'seg cols3' }, [h('legend', { text: 'カードの色' })]);
+      Object.keys(CARD.THEMES).forEach(function (k) {
+        var input = h('input', { type: 'radio', name: 'th' + uid, value: k });
+        input.checked = k === theme;
+        input.addEventListener('change', function () { if (input.checked) { theme = k; drawIt(); } });
+        seg.appendChild(h('label', null, [input, h('span', { text: CARD.THEMES[k].label })]));
+      });
+      function drawIt() {
+        sp.clear(); cardErr.textContent = '';
+        var r = CARD.draw(cv, { groups: groups, name: KO.displayName(cfg.name, reply.nameMode), item: cfg.item }, theme);
+        if (!r.ok) { cv.hidden = true; sp.hidden = true; cardErr.appendChild(h('div', { class: 'errors', text: '載せる文が多く、1枚に収まりません。載せる文を減らすか、2枚に分けてください。' })); }
+        else {
+          cv.hidden = false; sp.hidden = false;
+          // 【タダス検算②🟡1】字が小さくなったら、スマホで読みにくいことを知らせる
+          if (r.size < 36) cardErr.appendChild(h('p', { class: 'small', text: '文が多いため、字が小さくなっています（スマホでは読みにくい大きさです）。載せる文を減らすと大きくなります。' }));
+        }
+      }
+      page.appendChild(h('div', { class: 'cardwrap' }, [cv]));
+      page.appendChild(cardErr);
+      page.appendChild(sp);
+      page.appendChild(h('div', { class: 'panel' }, [seg]));
+      drawIt();
+      // 【タダス検算②🟡2】字の幅は文字の読み込み前に測ると揺れるので、読み込みが済んだらもう一度描く
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (cv.isConnected) drawIt(); });
+    }
+    // まとめ
+    var ng = cfg.places & ~reply.okPlaces;
+    page.appendChild(h('ul', { class: 'summary' }, [
+      h('li', null, [h('b', { text: 'お名前' }), KO.NAME_MODES[reply.nameMode] + '（' + KO.displayName(cfg.name, reply.nameMode) + '）']),
+      h('li', null, [h('b', { text: '載せてよい場所' }), reply.okPlaces ? KO.placeLabels(reply.okPlaces).join('・') : 'なし']),
+      ng ? h('li', null, [h('b', { text: '載せない場所' }), KO.placeLabels(ng).join('・')]) : null
+    ]));
+    var ul = h('ol', { class: 'sents' });
+    cfg.sents.forEach(function (t, i) {
+      var ok = reply.ans[i] === 1;
+      ul.appendChild(h('li', { class: 'scard ' + (ok ? 'is-ok' : 'is-no') }, [
+        h('div', { class: 'shead' }, [h('span', { class: 'snum', text: (i + 1) + '文目' }), h('span', { class: 'tag ' + (ok ? 'ok' : 'no'), text: ok ? '✓ 載せてOK' : '× 載せない' })]),
+        h('p', { class: 'stext', text: t })]));
+    });
+    page.appendChild(h('h2', { text: '文ごとの返事' }));
+    page.appendChild(ul);
+    // 控えに取り込む
+    var msg = h('p', { class: 'okmsg', role: 'status' });
+    page.appendChild(h('div', { class: 'panel' }, [
+      h('h3', { text: '声の控えに取り込む' }),
+      h('p', { class: 'small', text: 'この端末の「声の控え」に、' + who + 'の返事を残します。同じ相手・同じ感想の控えがあれば、その状態を変えます。' }),
+      h('div', { class: 'stack' }, [h('button', { type: 'button', text: '声の控えに取り込む', onclick: function () {
+        var st = loadStore(); if (broken) { msg.textContent = '控えが読み取れなかったため、取り込めませんでした。'; return; }
+        var res = KO.importReply(st, cfg, reply);
+        if (res === 'full') { msg.textContent = '控えが' + KO.LIM.recs + '件に達しているため、取り込めませんでした。'; return; }
+        saveStore(st);
+        // 【レビュー①🟡7】聞いたときの控えと一致しないときは、文が変わっていないか確かめてもらう
+        msg.textContent = res === 'new' ? '控えに新しく足しました。聞いたときの感想と一致する控えがありませんでした。文が変わっていないか確かめてください。' : '控えの状態を「' + KO.STATUS_TEXT[status] + '」にしました。';
+      } })]), msg]));
+    page.appendChild(h('p', { class: 'rule', text: RULE_NOTE }));
+    page.appendChild(h('button', { type: 'button', class: 'linklike', text: '声の控えを開く', onclick: goMake }));
+  }
+  function renderBroken() {
+    document.title = 'お客さまの声の掲載OKリンク';
+    app.textContent = '';
+    app.appendChild(h('h1', { text: '内容が読み取れませんでした' }));
+    app.appendChild(h('div', { class: 'errors', text: 'リンクが壊れているか、対応していない形式です。リンクを送ってくれた方に、もう一度確認してください。' }));
+    app.appendChild(h('button', { type: 'button', text: '掲載OKリンクを作る画面へ', onclick: goMake }));
+  }
+  function goMake() {
+    try { history.pushState(null, '', baseUrl()); } catch (e) { location.hash = ''; }
+    route();
+  }
+  function route() {
+    var hash = location.hash;
+    if (!hash || hash === '#') renderMake();
+    else {
+      var o = KO.decodeHash(hash);
+      if (!o) renderBroken();
+      else if (o.kind === 'reply') renderReply(o.cfg, o.reply);
+      else renderAsk(o.cfg);
+    }
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon='{"token": "b4c9f7e78daf4edb84ef52b88633f649"}'></script>
+</body>
+</html>
